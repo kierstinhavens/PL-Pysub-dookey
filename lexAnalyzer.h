@@ -34,7 +34,7 @@ class lexAnalyzer
 public:
     void getTokenInfo(Interface&, lexAnalyzer&);
     void showTokenInfo(Interface&, lexAnalyzer&);
-    void clearTokenInfo(Interface&, lexAnalyzer&);
+    void clearTokenInfo();
 
     lexAnalyzer();
 private:
