@@ -11,7 +11,12 @@ using namespace std;
 lexAnalyzer::lexAnalyzer() {
 }
 
-
+void lexAnalyzer::clearTokenInfo()
+{
+	tokenInfo.clear();
+	whatCategoryVector.clear();
+	numTokenLine.clear();
+}
 
 void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 {
@@ -19,24 +24,26 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 	string store;
 	char token;
 
+	whatCategoryVector.clear();
+
 	for (int i = 0; i < inter1.programCode.size(); i++)
 	{
-		pairType startPair;
+		pairType tempPair;
 		tokenLineType whatTokenLineType;
 
 		store = inter1.programCode[i];
 
 		int totalTokens = 0;
-		int loopIter = 0;
-
-		for (int j = 0; j < inter1.programCode[i].length(); j++)
+	
+		int j = 0;
+		while (j < store.length())
 		{
 			token = store[j];
 
 			//Check if token is a ', also known as string literal, int(39) is the ASCII character for '
 			if (store[j] == int(39))
 			{
-				string helpStr;
+				string tempStr;
 				j++;
 				while (store[j] != int(39))
 				{
@@ -45,12 +52,13 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 						cout << "There is no ending quote in your file" << endl;
 						exit(1);
 					}
-					helpStr += store[j];
+					tempStr += store[j];
 					j++;
 				}
-				helpStr += "";
-				startPair = make_pair(helpStr, categoryType::STRING_LITERAL);
-				whatTokenLineType.push_back(startPair);
+				tempStr += "";
+				tempPair.first = tempStr;
+				tempPair.second = categoryType::STRING_LITERAL;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("STRING_LITERAL");
 				totalTokens++;
 			}
@@ -58,7 +66,7 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Check if token is a ", also known as string literal, int(34) is the ASCII character for "
 			else if (store[j] == int(34))
 			{
-				string helpStr;
+				string tempStr;
 				j++;
 				while (store[j] != int(34))
 				{
@@ -67,12 +75,13 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 						cout << "There is no ending quote in your file" << endl;
 						exit(1);
 					}
-					helpStr += store[j];
+					tempStr += store[j];
 					j++;
 				}
-				helpStr += "";
-				startPair = make_pair(helpStr, categoryType::STRING_LITERAL);
-				whatTokenLineType.push_back(startPair);
+				tempStr += "";
+				tempPair.first = tempStr;
+				tempPair.second = categoryType::STRING_LITERAL;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("STRING_LITERAL");
 				totalTokens++;
 			}
@@ -88,8 +97,9 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 					storeComment += store[j];
 					j++;
 				}
-				startPair = make_pair(storeComment, categoryType::COMMENT);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = storeComment;
+				tempPair.second = categoryType::COMMENT;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("COMMENT");
 				totalTokens++;
 			}
@@ -105,66 +115,63 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 				}
 
 				newDigits += store[j];
-				startPair = make_pair(newDigits, categoryType::NUMERIC_LITERAL);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = newDigits;
+				tempPair.second = categoryType::NUMERIC_LITERAL;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("NUMERIC_LITERAL");
-				totalTokens++;
-			}
-
-			//Check if token is the assignment operator
-			else if (token == '=')
-			{
-				startPair = make_pair(token, categoryType::ASSIGNMENT_OP);
-				whatTokenLineType.push_back(startPair);
-				whatCategoryVector.push_back("ASSIGNMENT_OP");
 				totalTokens++;
 			}
 
 			//Check if token is a COMMA-- ","
 			else if (token == ',')
 			{
-				startPair = make_pair(token, categoryType::COMMA);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = token;
+				tempPair.second = categoryType::COMMA;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("COMMA");
 				totalTokens++;
 			}
 
 			//Check if token is a '==', also known as relational operator
-			else if (token == '=' && store[j + 1] == '=' && j < (inter1.programCode.size() - 1))
+			else if (token == '=' && store[j + 1] == '=')
 			{
-				startPair = make_pair('==', categoryType::RELATIONAL_OP);
+				tempPair.first = "==";
+				tempPair.second = categoryType::RELATIONAL_OP;
 				j++;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RELATIONAL_OP");
 				totalTokens++;
 			}
 
 			//Check if token is a '<=', relational operator
-			else if (token == '<' && store[j + 1] == '=' && j < (inter1.programCode.size() - 1))
+			else if (token == '<' && store[j + 1] == '=')
 			{
-				startPair = make_pair('<=', categoryType::RELATIONAL_OP);
+				tempPair.first = "<=";
+				tempPair.second = categoryType::RELATIONAL_OP;
 				j++;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RELATIONAL_OP");
 				totalTokens++;
 			}
 
 			//Check if token is a '>=', relational operator
-			else if (token == '>' && store[j + 1] == '=' && j < (inter1.programCode.size() - 1))
+			else if (token == '>' && store[j + 1] == '=')
 			{
-				startPair = make_pair('>=', categoryType::RELATIONAL_OP);
+				tempPair.first = ">=";
+				tempPair.second = categoryType::RELATIONAL_OP;
 				j++;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RELATIONAL_OP");
 				totalTokens++;
 			}
 
 			//Check if token is a '!=', relational operator
-			else if (token == '!' && store[j + 1] == '=' && j < (inter1.programCode.size() - 1))
+			else if (token == '!' && store[j + 1] == '=')
 			{
-				startPair = make_pair('!=', categoryType::RELATIONAL_OP);
+				tempPair.first = '!=';
+				tempPair.second = categoryType::RELATIONAL_OP;
 				j++;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RELATIONAL_OP");
 				totalTokens++;
 			}
@@ -172,8 +179,9 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Check if token is a '<', relational operator
 			else if (token == '<')
 			{
-				startPair = make_pair(token, categoryType::RELATIONAL_OP);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = token;
+				tempPair.second = categoryType::RELATIONAL_OP;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RELATIONAL_OP");
 				totalTokens++;
 			}
@@ -181,41 +189,54 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Check if token is a '>', relational operator
 			else if (token == '>')
 			{
-				startPair = make_pair(token, categoryType::RELATIONAL_OP);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = token;
+				tempPair.second = categoryType::RELATIONAL_OP;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RELATIONAL_OP");
 				totalTokens++;
 			}
 
+			//Check if token is the assignment operator
+			else if (token == '=')
+			{
+				tempPair.first = token;
+				tempPair.second = categoryType::ASSIGNMENT_OP;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("ASSIGNMENT_OP");
+				totalTokens++;
+			}
+
 			//Check if token is logical operator: not
-			else if (token == 'n' && (j + 1 < (inter1.programCode.size() - 1)) && store[j + 1] == 'o' && store[j + 2] == 't')
+			else if (token == 'n' && store[j + 1] == 'o' && store[j + 2] == 't')
 			{
 				string storeKey = "not";
-				startPair = make_pair(storeKey, categoryType::LOGICAL_OP);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::LOGICAL_OP;
 				j += 2;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("LOGICAL_OP");
 				totalTokens++;
 			}
 
 			//Check if token is logical operator: and
-			else if (token == 'a' && (j + 1 < (inter1.programCode.size() - 1)) && store[j + 1] == 'n' && store[j + 2] == 'd')
+			else if (token == 'a' && store[j + 1] == 'n' && store[j + 2] == 'd')
 			{
 				string storeKey = "and";
-				startPair = make_pair(storeKey, categoryType::LOGICAL_OP);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::LOGICAL_OP;
 				j += 2;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("LOGICAL_OP");
 				totalTokens++;
 			}
 
 			//Check if token is logical operator: or
-			else if (token == 'o' && (j  < (inter1.programCode.size() - 1)) && store[j + 1] == 'r')
+			else if (token == 'o' && store[j + 1] == 'r')
 			{
 				string storeKey = "or";
-				startPair = make_pair(storeKey, categoryType::LOGICAL_OP);
-				j ++;
-				whatTokenLineType.push_back(startPair);
+				tempPair = make_pair(storeKey, categoryType::LOGICAL_OP);
+				j++;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("LOGICAL_OP");
 				totalTokens++;
 			}
@@ -223,74 +244,177 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Check if token is a COLON or ':'
 			else if (token == ':')
 			{
-				startPair = make_pair(token, categoryType::COLON);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = token;
+				tempPair.second = categoryType::COLON;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("COLON");
 				totalTokens++;
 			}
 
 			//Check if token is keyword: input
-			else if ((j + 3 < (inter1.programCode[i].size() - 1)) && store[j] == 'i' && store[j + 1] == 'n' && store[j + 2] == 'p' && store[j + 3] == 'u' && store[j + 4] == 't')
+			else if (store[j] == 'i' && store[j + 1] == 'n' && store[j + 2] == 'p' && store[j + 3] == 'u' && store[j + 4] == 't')
 			{
 				string storeKey = "input";
-				startPair = make_pair(storeKey, categoryType::KEYWORD);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
 				j += 4;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword: false
+			else if (store[j] == 'F' && store[j + 1] == 'a' && store[j + 2] == 'l' && store[j + 3] == 's' && store[j + 4] == 'e')
+			{
+				string storeKey = "False";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 4;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token keyword: True
+			else if (store[j] == 'T' && store[j + 1] == 'r' && store[j + 2] == 'u' && store[j + 3] == 'e')
+			{
+				string storeKey = "True";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 3;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword: break
+			else if (store[j] == 'b' && store[j + 1] == 'r' && store[j + 2] == 'e' && store[j + 3] == 'a'&& store[j+4]=='k')
+			{
+				string storeKey = "break";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 4;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword: class
+			else if (store[j] == 'c' && store[j + 1] == 'l' && store[j + 2] == 'a' && store[j + 3] == 's' && store[j + 4] == 's')
+			{
+				string storeKey = "break";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 4;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword: return
+			else if (store[j] == 'r' && store[j + 1] == 'e' && store[j + 2] == 't' && store[j + 3] == 'u' && store[j + 4] == 'r' && store[j+5]=='n')
+			{
+				string storeKey = "return";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 5;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword: for
+			else if (store[j] == 'f' && store[j + 1] == 'o' && store[j + 2] == 'r')
+			{
+				string storeKey = "for";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 2;
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword: import
+			else if (store[j] == 'i' && store[j + 1] == 'm' && store[j + 2] == 'p' && store[j + 3] == 'o' && store[j + 4] == 'r' && store[j + 5] == 't')
+			{
+				string storeKey = "import";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 5;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("KEYWORD");
 				totalTokens++;
 			}
 
 			//Check if token is keyword: while
-			else if ((j + 3 < (inter1.programCode[i].size() - 1)) && store[j] == 'w' && store[j + 1] == 'h' && store[j + 2] == 'i' && store[j + 3] == 'l' && store[j + 4] == 'e')
+			else if (store[j] == 'w' && store[j + 1] == 'h' && store[j + 2] == 'i' && store[j + 3] == 'l' && store[j + 4] == 'e')
 			{
 				string storeKey = "while";
-				startPair = make_pair(storeKey, categoryType::KEYWORD);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
 				j += 4;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("KEYWORD");
 				totalTokens++;
 			}
 
 			//Check if token is keyword: else
-			else if (token == 'e' && (j + 2 < (inter1.programCode.size() - 1)) && store[j + 1] == 'l' && store[j + 2] == 's' && store[j + 3] == 'e')
+			else if (token == 'e' && store[j + 1] == 'l' && store[j + 2] == 's' && store[j + 3] == 'e')
 			{
 				string storeKey = "else";
-				startPair = make_pair(storeKey, categoryType::KEYWORD);
+				tempPair.first = storeKey; 
+				tempPair.second= categoryType::KEYWORD;
 				j += 3;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("KEYWORD");
 				totalTokens++;
 			}
 
 			//Check if token is keyword: elif
-			else if (token == 'e' && (j + 2 < (inter1.programCode.size() - 1)) && store[j + 1] == 'l' && store[j + 2] == 'i' && store[j + 3] == 'f')
+			else if (token == 'e' && store[j + 1] == 'l' && store[j + 2] == 'i' && store[j + 3] == 'f')
 			{
 				string storeKey = "elif";
-				startPair = make_pair(storeKey, categoryType::KEYWORD);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
 				j += 3;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("KEYWORD");
 				totalTokens++;
 			}
 
 			//Check if token is keyword: if
-			else if (token == 'i' && (j + 2 < (inter1.programCode.size() - 1)) && store[j+1] == 'f')
+			else if (token == 'i' && store[j+1] == 'f')
 			{
 				string storeKey = "if";
-				startPair = make_pair(storeKey, categoryType::KEYWORD);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
 				j ++;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
+				whatCategoryVector.push_back("KEYWORD");
+				totalTokens++;
+			}
+
+			//Check if token is keyword 'print'
+			else if (store[j] == 'p' && store[j + 1] == 'r' && store[j + 2] == 'i' && store[j + 3] == 'n' && store[j + 4] == 't')
+			{
+				string storeKey = "print";
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
+				j += 4;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("KEYWORD");
 				totalTokens++;
 			}
 
 			//Check if token is keyword: int
-			else if (token == 'i' && (j + 2 < (inter1.programCode.size() - 1)) && store[j + 1] == 'n' && store[j + 2] == 't')
+			else if (store[j] == 'i' && store[j + 1] == 'n' && store[j + 2] == 't')
 			{
 				string storeKey = "int";
-				startPair = make_pair(storeKey, categoryType::KEYWORD);
+				tempPair.first = storeKey;
+				tempPair.second = categoryType::KEYWORD;
 				j += 2;
-				whatTokenLineType.push_back(startPair);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("KEYWORD");
 				totalTokens++;
 			}
@@ -298,8 +422,9 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Check if token is left parenthesis
 			else if (token == '(')
 			{
-				startPair = make_pair(token, categoryType::LEFT_PAREN);
-				whatTokenLineType.push_back(startPair);
+				tempPair.first = token;
+				tempPair.second = categoryType::LEFT_PAREN;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("LEFT_PAREN");
 				totalTokens++;
 			}
@@ -307,79 +432,45 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Check if token is right parenthesis
 			else if (token == ')')
 			{
-				startPair = make_pair(token, categoryType::RIGHT_PAREN);
-				whatTokenLineType.push_back(startPair);
+				tempPair = make_pair(token, categoryType::RIGHT_PAREN);
+				tempPair.first = token;
+				tempPair.second = categoryType::RIGHT_PAREN;
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("RIGHT_PAREN");
 				totalTokens++;
 			}
 
-			//Check if token is a '+', arithmetic operator
-			else if (token == '+')
+			//Check if token is a arithmetic operator
+			else if (token == '%'|| token=='/' || token=='*' || token== '-' || token=='+')
 			{
-				startPair = make_pair(token, categoryType::ARITH_OP);
-				whatTokenLineType.push_back(startPair);
-				whatCategoryVector.push_back("ARITH_OP");
-				totalTokens++;
-			}
-
-			//Check if token is a '-', arithmetic operator
-			else if (token == '-')
-			{
-				startPair = make_pair(token, categoryType::ARITH_OP);
-				whatTokenLineType.push_back(startPair);
-				whatCategoryVector.push_back("ARITH_OP");
-				totalTokens++;
-			}
-
-			//Check if token is a '*', arithmetic operator
-			else if (token == '*')
-			{
-				startPair = make_pair(token, categoryType::ARITH_OP);
-				whatTokenLineType.push_back(startPair);
-				whatCategoryVector.push_back("ARITH_OP");
-				totalTokens++;
-			}
-
-			//Check if token is a '%', arithmetic operator
-			else if (token == '%')
-			{
-				startPair = make_pair(token, categoryType::ARITH_OP);
-				whatTokenLineType.push_back(startPair);
-				whatCategoryVector.push_back("ARITH_OP");
-				totalTokens++;
-			}
-
-			//Check if token is a '/', arithmetic operator
-			else if (token == '/')
-			{
-				startPair = make_pair(token, categoryType::ARITH_OP);
-				whatTokenLineType.push_back(startPair);
+				tempPair = make_pair(token, categoryType::ARITH_OP);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("ARITH_OP");
 				totalTokens++;
 			}
 
 			//Checks if token is an indentation, also known as 4 spaces
-			else if (token == '/t' || (j + 3 < (inter1.programCode[i].size() - 1)) && store[j] == ' ' && store[j + 1] == ' ' && store[j + 2] == ' ' && store[j + 3] == ' ')
+			else if (token == '/t' || store[j] == ' ' && store[j + 1] == ' ' && store[j + 2] == ' ' && store[j + 3] == ' ')
 			{
-				startPair = make_pair(token, categoryType::INDENT);
-				whatTokenLineType.push_back(startPair);
+				tempPair = make_pair(token, categoryType::INDENT);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("INDENT");
 				totalTokens++;
 			}
 
-			//Checks if token if an identifier using cctype
-			else if (isalpha(store[j]))
+			//Checks if token if an identifier/variable using cctype
+			else if (isalpha(store[j])|| store[j]=='_') 
 			{
 				string storeId;
-				while (isalpha(store[j]) && isalpha(store[j + 1]))
+				//This ensures that any digit that is in the variable name is included in the identifier category and not classified as a numeric literal
+				while ((isalpha(store[j]) || store[j]=='_') && (isalpha(store[j+1])))
 				{
 					storeId += store[j];
 					j++;
 				}
-
 				storeId += store[j];
-				startPair = make_pair(storeId, categoryType::IDENTIFIER);
-				whatTokenLineType.push_back(startPair);
+				tempPair = make_pair(storeId, categoryType::IDENTIFIER);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("IDENTIFIER");
 				totalTokens++;
 			}
@@ -387,26 +478,40 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 			//Checks if the token is not recognized or unknown
 			else if (!isspace(token) && (!isblank(token)))
 			{
-				startPair = make_pair(token, categoryType::UNKNOWN);
-				whatTokenLineType.push_back(startPair);
+				tempPair = make_pair(token, categoryType::UNKNOWN);
+				whatTokenLineType.push_back(tempPair);
 				whatCategoryVector.push_back("UNKNOWN");
 				totalTokens++;
 			}
+			j++;
 		}
+
+		lexAn.tokenInfo.push_back(whatTokenLineType);
+		lexAn.numTokenLine.push_back(1);
+		lexAn.numTokenLine[i] = totalTokens;
 	}
+	lexAn.showTokenInfo(inter1, lexAn);
 }
-/*
-void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
+
+
+void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn) 
 {
-	//nested for loop will display info from read func
-	int indexVariable = 0;
-	for (int i = 0; i < inter1.programCode.size(); i++)
+
+	// Seperate counter for categories
+	int categoryTotal = 0;
+
+	// nested for loop will display info from read function
+	for (int i = 0; i < inter1.programCode.size(); i++) 
 	{
-		cout << "Line#" << i << ":" << endl;
-		for (int j = 0; j < lexAn.numTokenLine[i]; j++)
+		cout << "Line #" << i << ":" << endl;
+
+		for (int j = 0; j < lexAn.numTokenLine[i]; j++) 
 		{
-			cout << "Token(" << lexAn.
+			cout << "Token[" << j << "]: ";
+			cout << lexAn.tokenInfo[i][j].first << " - " << lexAn.whatCategoryVector[categoryTotal] << endl;
+			categoryTotal++;
 		}
+		cout << "------------------------------------------------------------------" << endl;
 	}
+	clearTokenInfo();
 }
-*/
