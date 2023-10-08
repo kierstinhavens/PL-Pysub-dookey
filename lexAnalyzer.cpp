@@ -490,7 +490,6 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 		lexAn.numTokenLine.push_back(1);
 		lexAn.numTokenLine[i] = totalTokens;
 	}
-	lexAn.showTokenInfo(inter1, lexAn);
 }
 
 
@@ -513,5 +512,4 @@ void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 		}
 		cout << "------------------------------------------------------------------" << endl;
 	}
-	clearTokenInfo();
 }
