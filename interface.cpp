@@ -65,7 +65,7 @@ originalPath: //to direct program back
 		//This will call the "show tokens" function after the check has been made that a file is stored in read
 		else
 		{
-			lexAn.getTokenInfo(inter1, lexAn);
+			lexAn.showTokenInfo(inter1, lexAn);
 			goto originalPath;
 		}
 	}
@@ -178,6 +178,7 @@ helpPath:
 void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn)
 {
 	clearCommand(inter1, lexAn);
+	lexAn.clearTokenInfo();
 
 	ifstream ifile(userFile);
 	if (!ifile)
@@ -194,7 +195,7 @@ void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn)
 		if (!ifile)
 			break;
 	}
-
+	lexAn.getTokenInfo(inter1, lexAn);
 	cout << "Your file has been read, you may view it through the show command now. " << endl;
 	ifile.close();
 }
