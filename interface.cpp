@@ -5,6 +5,7 @@
 #include<vector>
 #include "interface.h"
 #include "lexanalyzer.h"
+#include "expevaluator.h"
 using namespace std;
 
 //constructor
@@ -16,15 +17,16 @@ void Interface::startInterface()
 {
 	Interface inter1;
 	lexAnalyzer lexAn;
+	expEvaluator expE;
 
 	cout << "Pysub Interpreter 1.0 on Windows (September 2023)" << endl;
 	cout << "Enter program lines or read (<filename.py>) at command line interface" << endl;
 	cout << "Type 'help' for more information or 'quit' to exit" << endl;
 
-	input(inter1, lexAn);
+	input(inter1, lexAn, expE);
 }
 
-void Interface::input (Interface& inter1, lexAnalyzer& lexAn)
+void Interface::input (Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
 {
 originalPath: //to direct program back 
 
@@ -50,7 +52,7 @@ originalPath: //to direct program back
 		}
 		else
 		{
-			showCommand(inter1, lexAn);
+			showCommand(inter1, lexAn, expE);
 			goto originalPath;
 		}
 	}
@@ -65,7 +67,7 @@ originalPath: //to direct program back
 		//This will call the "show tokens" function after the check has been made that a file is stored in read
 		else
 		{
-			lexAn.showTokenInfo(inter1, lexAn);
+			lexAn.showTokenInfo(inter1, lexAn, expE);
 			goto originalPath;
 		}
 	}
@@ -73,14 +75,14 @@ originalPath: //to direct program back
 	//User enters clear command
 	else if (input == "clear" || input == "clear()")
 	{
-		clearCommand(inter1, lexAn);
+		clearCommand(inter1, lexAn, expE);
 		cout << "Information has been cleared from the system. " << endl;
 		goto originalPath;
 	}
 
 	//User enters the help command
 	else if (input == "help" || input == "help()")
-		helpCommand(inter1, lexAn);
+		helpCommand(inter1, lexAn, expE);
 
 	//User enters read command; the following else statements check for different variations of user input
 	else if (input[0] == 'r' && input[1] == 'e' && input[2] == 'a' && input[3] == 'd' && stringLength < 5)
@@ -94,7 +96,7 @@ originalPath: //to direct program back
 		userFile.clear();
 		for (int i = 5; i < stringLength; i++)
 			userFile.push_back(input[i]);
-		readCommand(inter1, lexAn);
+		readCommand(inter1, lexAn, expE);
 		goto originalPath;
 	}
 	//read function if user does enter parentheses
@@ -104,7 +106,7 @@ originalPath: //to direct program back
 		//indexing for the file starts after parenthesis
 		for (int i = 5; i < stringLength - 1; i++)
 			userFile.push_back(input[i]);
-		readCommand(inter1, lexAn);
+		readCommand(inter1, lexAn, expE);
 		goto originalPath;
 	}
 	else
@@ -115,7 +117,7 @@ originalPath: //to direct program back
 }
 
 //User enters the help command. This is the help command function definition
-void Interface::helpCommand(Interface& inter1, lexAnalyzer& lexAn)
+void Interface::helpCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
 {
 	cout << endl;
 	cout << "Welcome to the Help Utility! " << endl;
@@ -140,7 +142,7 @@ helpPath:
 	else if (helpMe == "exit" || helpMe == "(exit()")
 	{
 		cout << "You have exited the help utility. You will be directed back to the main interface now. " << endl;
-		input(inter1, lexAn);
+		input(inter1, lexAn, expE);
 	}
 	else if (helpMe == "help" || helpMe == "help()")
 	{
@@ -175,16 +177,16 @@ helpPath:
 }
 
 //this will clear any data in the program code vector and then read in the user's python file
-void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn)
+void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
 {
-	clearCommand(inter1, lexAn);
+	clearCommand(inter1, lexAn, expE);
 	lexAn.clearTokenInfo();
 
 	ifstream ifile(userFile);
 	if (!ifile)
 	{
 		cout << "Sorry, we had a problem opening your file. You will be directed back to the main interface now. " << endl;
-		input(inter1, lexAn);
+		input(inter1, lexAn, expE);
 	}
 
 	string readString = "";
@@ -195,20 +197,20 @@ void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn)
 		if (!ifile)
 			break;
 	}
-	lexAn.getTokenInfo(inter1, lexAn);
+	lexAn.getTokenInfo(inter1, lexAn, expE);
 	cout << "Your file has been read, you may view it through the show command now. " << endl;
 	ifile.close();
 }
 
 //utilizes the vector "clear()" built in func to clear any data already/previously stored in the vector
-void Interface::clearCommand(Interface& inter1, lexAnalyzer& lexAn)
+void Interface::clearCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
 {
 	inter1.programCode.clear();
 }
 
 //this function will display the code in the user's python file once entered through the read command
 //it will also include line numbers (this is completed by the use of i in the iteration of the for loop)
-void Interface::showCommand(Interface& inter1, lexAnalyzer& lexAn)
+void Interface::showCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
 {
 	for (int i = 0; i < inter1.programCode.size(); i++)
 	{
