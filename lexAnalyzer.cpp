@@ -18,7 +18,7 @@ void lexAnalyzer::clearTokenInfo()
 	numTokenLine.clear();
 }
 
-void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
+void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
 {
 	tokenType finalTokenType;
 	string store;
@@ -493,7 +493,7 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn)
 }
 
 
-void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn) 
+void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE) 
 {
 
 	// Seperate counter for categories
