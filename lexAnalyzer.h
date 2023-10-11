@@ -2,9 +2,11 @@
 #define LEXANALYZER_H
 
 #include "interface.h"
+#include "expevaluator.h"
 #include <iostream>
 #include <vector>
 #include <string>
+#include <utility>
 
 using namespace std;
 
@@ -30,10 +32,11 @@ enum class categoryType
 class lexAnalyzer
 {
     friend class Interface;
+    friend class expEvaluator;
 
 public:
-    void getTokenInfo(Interface&, lexAnalyzer&);
-    void showTokenInfo(Interface&, lexAnalyzer&);
+    void getTokenInfo(Interface&, lexAnalyzer&, expEvaluator&);
+    void showTokenInfo(Interface&, lexAnalyzer&, expEvaluator&);
     void clearTokenInfo();
 
     lexAnalyzer();
