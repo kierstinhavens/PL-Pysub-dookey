@@ -6,6 +6,7 @@
 #include "interface.h"
 #include "lexanalyzer.h"
 #include "expevaluator.h"
+#include "interpreter.h"
 using namespace std;
 
 //constructor
@@ -18,20 +19,21 @@ void Interface::startInterface()
 	Interface inter1;
 	lexAnalyzer lexAn;
 	expEvaluator expE;
+	Interpreter pysubi;
 
 	cout << "Pysub Interpreter 1.0 on Windows (September 2023)" << endl;
 	cout << "Enter program lines or read (<filename.py>) at command line interface" << endl;
 	cout << "Type 'help' for more information or 'quit' to exit" << endl;
 
-	input(inter1, lexAn, expE);
+	input(inter1, lexAn, expE, pysubi);
 }
 
-void Interface::input (Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
+void Interface::input (Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi)
 {
 originalPath: //to direct program back 
 
 	string input;
-
+	pysubi.interpMode = false;
 	//get the input from user
 	cout << endl << ">>> ";
 
@@ -52,11 +54,27 @@ originalPath: //to direct program back
 		}
 		else
 		{
-			showCommand(inter1, lexAn, expE);
+			showCommand(inter1, lexAn, expE, pysubi);
 			goto originalPath;
 		}
 	}
-	//User enters show(tokens) to view each token of python file
+
+
+
+	//User enters expression
+	else if (input.length() >= 2 && ((isdigit(input[0]) || input[0] == '(') || (input[0] == 'n' && input[1] == 'o' && input[2] == 't')))
+	{
+		if (pysubi.interpMode == false)
+		{
+			inter1.clearCommand(inter1, lexAn, expE, pysubi);
+			inter1.programCode.push_back(input);
+			lexAn.getTokenInfo(inter1, lexAn, expE, pysubi);
+			expE.startExp(inter1, lexAn, expE, pysubi);
+			goto originalPath;
+		}
+	}
+
+	//User enters show(tokens) to view each token of python file 
 	else if (input == "show(tokens)")
 	{
 		if (inter1.programCode.empty() == true)
@@ -67,7 +85,8 @@ originalPath: //to direct program back
 		//This will call the "show tokens" function after the check has been made that a file is stored in read
 		else
 		{
-			lexAn.showTokenInfo(inter1, lexAn, expE);
+			lexAn.showTokenInfo(inter1, lexAn, expE, pysubi);
+			//inter1.clearCommand(inter1, lexAn, expE);
 			goto originalPath;
 		}
 	}
@@ -75,14 +94,14 @@ originalPath: //to direct program back
 	//User enters clear command
 	else if (input == "clear" || input == "clear()")
 	{
-		clearCommand(inter1, lexAn, expE);
+		clearCommand(inter1, lexAn, expE, pysubi);
 		cout << "Information has been cleared from the system. " << endl;
 		goto originalPath;
 	}
 
 	//User enters the help command
 	else if (input == "help" || input == "help()")
-		helpCommand(inter1, lexAn, expE);
+		helpCommand(inter1, lexAn, expE, pysubi);
 
 	//User enters read command; the following else statements check for different variations of user input
 	else if (input[0] == 'r' && input[1] == 'e' && input[2] == 'a' && input[3] == 'd' && stringLength < 5)
@@ -96,7 +115,7 @@ originalPath: //to direct program back
 		userFile.clear();
 		for (int i = 5; i < stringLength; i++)
 			userFile.push_back(input[i]);
-		readCommand(inter1, lexAn, expE);
+		readCommand(inter1, lexAn, expE, pysubi);
 		goto originalPath;
 	}
 	//read function if user does enter parentheses
@@ -106,18 +125,37 @@ originalPath: //to direct program back
 		//indexing for the file starts after parenthesis
 		for (int i = 5; i < stringLength - 1; i++)
 			userFile.push_back(input[i]);
-		readCommand(inter1, lexAn, expE);
+		readCommand(inter1, lexAn, expE, pysubi);
 		goto originalPath;
+	}
+	else if (input == "run()" || input == "run")
+	{
+		if (inter1.programCode.empty()==true)
+			cout << "Please use the read() command first" << endl;
+		else
+		{
+			pysubi.interpretTheLine(inter1, lexAn, expE, pysubi);
+			pysubi.interpMode = false;
+		}
+		goto originalPath;
+	}
+	else if (input == "show(variables)" || input == "show(var)")
+	{
+		expE.showVariables(inter1, lexAn, expE, pysubi);
 	}
 	else
 	{
-		cout << "Please enter a proper command." << endl;
-		goto originalPath;
+		if (pysubi.interpMode == false && pysubi.userInput==false)
+		{
+			cout << "Please enter a proper command." << endl;
+			goto originalPath;
+		}
 	}
 }
 
+
 //User enters the help command. This is the help command function definition
-void Interface::helpCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
+void Interface::helpCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi)
 {
 	cout << endl;
 	cout << "Welcome to the Help Utility! " << endl;
@@ -142,7 +180,7 @@ helpPath:
 	else if (helpMe == "exit" || helpMe == "(exit()")
 	{
 		cout << "You have exited the help utility. You will be directed back to the main interface now. " << endl;
-		input(inter1, lexAn, expE);
+		input(inter1, lexAn, expE, pysubi);
 	}
 	else if (helpMe == "help" || helpMe == "help()")
 	{
@@ -177,16 +215,15 @@ helpPath:
 }
 
 //this will clear any data in the program code vector and then read in the user's python file
-void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
+void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi)
 {
-	clearCommand(inter1, lexAn, expE);
-	lexAn.clearTokenInfo();
+	clearCommand(inter1, lexAn, expE, pysubi);
 
 	ifstream ifile(userFile);
 	if (!ifile)
 	{
 		cout << "Sorry, we had a problem opening your file. You will be directed back to the main interface now. " << endl;
-		input(inter1, lexAn, expE);
+		input(inter1, lexAn, expE, pysubi);
 	}
 
 	string readString = "";
@@ -197,20 +234,22 @@ void Interface::readCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator&
 		if (!ifile)
 			break;
 	}
-	lexAn.getTokenInfo(inter1, lexAn, expE);
+	lexAn.getTokenInfo(inter1, lexAn, expE, pysubi);
 	cout << "Your file has been read, you may view it through the show command now. " << endl;
 	ifile.close();
 }
 
 //utilizes the vector "clear()" built in func to clear any data already/previously stored in the vector
-void Interface::clearCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
+void Interface::clearCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi)
 {
 	inter1.programCode.clear();
+	lexAn.clearTokenInfo();
+	expE.clearTable();
 }
 
 //this function will display the code in the user's python file once entered through the read command
 //it will also include line numbers (this is completed by the use of i in the iteration of the for loop)
-void Interface::showCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
+void Interface::showCommand(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi)
 {
 	for (int i = 0; i < inter1.programCode.size(); i++)
 	{
