@@ -3,6 +3,7 @@
 
 #include "interface.h"
 #include "expevaluator.h"
+#include "interpreter.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -33,10 +34,11 @@ class lexAnalyzer
 {
     friend class Interface;
     friend class expEvaluator;
+    friend class Interpreter;
 
 public:
-    void getTokenInfo(Interface&, lexAnalyzer&, expEvaluator&);
-    void showTokenInfo(Interface&, lexAnalyzer&, expEvaluator&);
+    void getTokenInfo(Interface&, lexAnalyzer&, expEvaluator&, Interpreter&);
+    void showTokenInfo(Interface&, lexAnalyzer&, expEvaluator&, Interpreter&);
     void clearTokenInfo();
 
     lexAnalyzer();
@@ -48,6 +50,7 @@ private:
 
     vector<int> numTokenLine;
     vector<string> whatCategoryVector;
+    tokenLineType tempExp;
 };
 
 #endif
