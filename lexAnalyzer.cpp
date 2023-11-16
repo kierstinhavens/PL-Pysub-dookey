@@ -5,6 +5,7 @@
 #include<vector>
 #include "lexanalyzer.h"
 #include "interface.h"
+#include "interpreter.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ void lexAnalyzer::clearTokenInfo()
 	numTokenLine.clear();
 }
 
-void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE)
+void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi)
 {
 	tokenType finalTokenType;
 	string store;
@@ -493,7 +494,7 @@ void lexAnalyzer::getTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluat
 }
 
 
-void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE) 
+void lexAnalyzer::showTokenInfo(Interface& inter1, lexAnalyzer& lexAn, expEvaluator& expE, Interpreter& pysubi) 
 {
 
 	// Seperate counter for categories
